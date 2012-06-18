@@ -68,9 +68,18 @@ Authy.UI = function() {
     var countries = [];
 
     // Private Members
-    var setupCellphoneValidation = function() {
+    var setupCellphone = function() {
         var cellPhone = document.getElementById("authy-cellphone");
-        if(!cellPhone) return;
+        if(!cellPhone) return
+
+        var pos = absolutePosFor(cellPhone);
+        var cc = document.createElement("span");
+        cc.innerText = "+1"
+        cc.setAttribute("id", "authy-cc-label");
+        cc.setAttribute("style", "position: absolute; top: "+ pos[0] +"px; left: " + pos[1] + "px;");
+
+        cellPhone.parentElement.insertBefore(cc); // FIXME: find the parent form element
+        cellPhone.style.paddingLeft = cc.offsetWidth+"px";
 
         cellPhone.onblur = function(){
           if(cellPhone.value != '' && cellPhone.value.match(/^([0-9][0-9][0-9])\W*([0-9][0-9]{2})\W*([0-9]{3,5})$/)){
@@ -295,7 +304,7 @@ Authy.UI = function() {
         setupTooltip();
         setupCountriesDropdown();
         setupEvents();
-        setupCellphoneValidation();
+        setupCellphone();
     }
 
     this.searchItem = function() {
@@ -324,8 +333,13 @@ Authy.UI = function() {
     this.autocomplete = function(obj) {
         document.getElementById('countries-input').value = obj.getAttribute("data-name");
         document.getElementById('countries-autocomplete').style.display = "none";
-
         document.getElementById('country-code').value = obj.getAttribute('rel');
+
+        var ccLabel = document.getElementById("authy-cc-label");
+        if(ccLabel) {
+          ccLabel.innerText = "+ "+obj.getAttribute("rel");
+          document.getElementById('authy-cellphone').style.paddingLeft = ccLabel.offsetWidth+"px";
+        }
     }
 
     this.setTooltip = function(title, msg) {
